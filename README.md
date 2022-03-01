@@ -33,8 +33,12 @@ Irrelevant RFCs
 
 Ironically, many DNS RFCs are irrelevant to day to day operations for nearly all of us.
 
-* https://tools.ietf.org/html/rfc9103 - DNS Zone Tr  ansfer over TLS
-    * Many DNS servers do not permit zone transfers over DNS
+* https://tools.ietf.org/html/rfc9103 - DNS Zone Transfer over TLS
+    * Many DNS servers do not permit zone transfers of DNS zones.
+    - Most clustered DNS servers have some other cluster backend.
+    - It can be incredibly useful for reviewing zones for dangling
+      entries, but Samba for example doesn't support it at all.
+
 
 * All the reverse DNS RFCs
     - Many sites do not support reverse DNS at all.
