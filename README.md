@@ -63,10 +63,11 @@ Ironically, many DNS RFCs are irrelevant to day to day operations for nearly all
     - IPv6 is useful to expose every device in a large environment to
       the Internet, but relies on intelligent firewalls to protect them.
 
-- The lists of approved domains.
+* The lists of approved domains.
     - Very few sites use anything but *.com for their primary services.
           - .gov is often used for official, federal documents.
-	  - The nationality domains are sometimes used for international services.
+	  - The nationality domains are occaionally used to segregate
+	    .com from from international services
 	  - Almost all bib ,cin domains are ignored, populated by domain
             squatters, or purchased by the .com domain owners to
             prevent domain squatting.
@@ -74,14 +75,14 @@ Ironically, many DNS RFCs are irrelevant to day to day operations for nearly all
 Vital RFCs
 ----------
 
-- Valid IP addresses
+* Valid IP addresses
     - All IPv4 addresses are 32 bits, all IPv6 addresses 64 bits.
     - Both have reserved, non-routable addresses which should never be permitted through a public router.
     - Both have overlapping spaces for loopback.
         - 127.0.0.1 is the IPv4 loopback, but all of 127.0.0/8 routes to it
-	- ::1 is the the loopback. Enabling others involves theological arguments.
+	- ::1 is the IPv6 loopback.
 
-- Non-routable IP addresses
+* Non-routable IP addresses
     - Almost everyone doing this uses 10.0.0.0/8
     - A few tools especially for home routers 192.168.0.0/16
     - Very, very few use 172.16.0.0/12
@@ -90,7 +91,7 @@ Vital RFCs
     - These leave plenty of space for local for business environments to provide local DNS records,
       and to split them up for useful departmental subdomans
 
-- SOA records
+* SOA records
     - These publish the owners of domains, the release number of
       updates, the duration of valid lookups, and the duration of
       failed lookups.
@@ -98,7 +99,7 @@ Vital RFCs
       associated RFCs, "optimizing performance" by caching lookups
       for hours or even permanently.
 
-- A records
+* A records
     - A records tie hostnames to IP addresses.
     - A records are not necessarily unique. One hostname may be
       linked to many IP addresses, and in large environments often are.
@@ -109,7 +110,7 @@ Vital RFCs
     - Some applications cache such records at start time and require a
       restart to change them. And yes, postfix did this.
 
-- CNAME records
+* CNAME records
     - CNAMEs are extremely useful ways to delegate a DNS hostname to be
       resolved with another DNS record.
     - The chain can be very long, and very confusing, especially with DNS
@@ -122,7 +123,7 @@ Vital RFCs
       some DNS servers do permit them.
           - This way lies madness.
 
-- Multiple A records
+* Multiple A records
     - Multiple hostnames may link to the same target address or addresses.
     - Multiple A records are useful for various forms of high availability, such
       as multiple AD domain controllers.
@@ -131,50 +132,16 @@ Vital RFCs
     - Very few systems do that multiple, unique hostname and multiple A records
       automatically.
 
-- Subdomains
-    - Any domain can have multiple subdomains.
-      - "localdomain" can have "dev.localdomain", "prod.localdomain", or "mydepartment.localdomain"
-    - A real subodomain normally has an SOA record, and NS records in its parent domain
-      to track down or report failures if it is offline.
-    - Simply calling a host "first.second.localdomain" does not create subdomains. Unless
-      "second.localdomain" is its own domain with an SOA and NS records, the domain is still "localdomain",
-      and the entry in that domain is "first.second"
+* TXT records
+    - Very handy for storing data about a domain.
+    - Used to be used for SPF, can still hold SPF data.
 
-- Wildcards
-    - Wildcards have become very popular to route all DNS requests to specific addresses, especially
-      for corporate addresses like "www.mycompany.com" and "wwww.mycomapny.com".
-    - These work well, but can lead to chaos when '*.com' leads all erroneous DNS lookups ending in .com
-      to be connected to Verisign's servers. This has happened with several domains.
-        - The wildcard lookups are resolved before DNS suffixes are
-          added, so "www.prod" under "www.prod.mycompany.com" wound up resolving to Verisign,
-	  not the internala "www.prod.mycompany.com" hostname.
+* MX records
+    - Ranked list of servers where email for the
+      domain is delivered.
 
-- Private domains
-    - Private domains are not propagated to the Internet.
-        - These must be selected carefully to avoid accidental conflict or
-	  resolution as public addresses.
-    - These are very broadly used for entirely internal services.
-
-- Split views
-    - Split zones make it possible tell a DNS servers that queries from one address space
-      resolve one way, and from another space resolve another way.
-    - Split views are especially common for websites that have different internal and
-      external load balancers.
-    - Split views are often very fragile, with different TTLs, poor synchronization,
-      and very confusing behavior as routing tables, VPNs, and proxies re re-arranged.
-    - Split views are the core of high-availability, and localizing
-      proxies such as Akamai and Cloudflare.
-
-- DNSSEC
-    - Securing corporate DNS services against fraudulent DNS records
-      has become more importane.
-    - Poisoned DNS records could and have connected people to entirely
-      fraudulent DNS services.
-    - DNSSEC helps prevent these replacements, but remains awkward and
-      and combersome to enact for small environments.
-
-- SPF
-    - SPF records indicate what hostnames, IP addresses, or Domain
+* RR records
+    - RR records for SPF indicate hostnames, IP addresses, or Domain
       Keys are permitted to send email from a particular DNS record.
       That DNS record gets the email bounces
     - SPF was originally a pure TXT record, set by the owner of the
@@ -185,12 +152,60 @@ Vital RFCs
     - The SPF RFC was combined with "Domain Keys" from Microsoft,
       which have nothing to do with the original SPF and requires
       keys purchased from Microsoft.
+    - SPF has issues with mail forwarding.
+
+* Subdomains
+    - Any domain can have multiple subdomains.
+      - "localdomain" can have "dev.localdomain", "prod.localdomain", or "mydepartment.localdomain"
+    - A real subodomain normally has an SOA record, and NS records in its parent domain
+      to track down or report failures if it is offline.
+    - Simply calling a host "first.second.localdomain" does not create subdomains. Unless
+      "second.localdomain" is its own domain with an SOA and NS records, the domain is still "localdomain",
+      and the entry in that domain is "first.second"
+
+* Wildcards
+    - Wildcards have become very popular to route all DNS requests to specific addresses, especially
+      for corporate addresses like "www.mycompany.com" and "wwww.mycomapny.com".
+    - These work well, but can lead to chaos when '*.com' leads all erroneous DNS lookups ending in .com
+      to be connected to Verisign's servers. This has happened with several domains.
+        - The wildcard lookups are resolved before DNS suffixes are
+          added, so "www.prod" under "www.prod.mycompany.com" wound up resolving to Verisign,
+	  not the internala "www.prod.mycompany.com" hostname.
+
+* Private domains
+    - Private domains are not propagated to the Internet.
+        - These must be selected carefully to avoid accidental conflict or
+	  resolution as public addresses.
+    - These are very broadly used for entirely internal services.
+
+* Split views
+    - Split zones make it possible tell a DNS servers that queries from one address space
+      resolve one way, and from another space resolve another way.
+    - Split views are especially common for websites that have different internal and
+      external load balancers.
+    - Split views are often very fragile, with different TTLs, poor synchronization,
+      and very confusing behavior as routing tables, VPNs, and proxies re re-arranged.
+    - Split views are the core of high-availability, and localizing
+      proxies such as Akamai and Cloudflare.
 
 
-- Not documented or not clear in RFC
-------------------------------------
+* SRV records
+    - Service records for Active Directory.
+    - AD and its SRV records are their own subject, and have almost nothing
+      to do with Internet facing services.
 
-- /etc/hosts predates and overrulesmost RFCs and DNS
+* DNSSEC
+    - Securing corporate DNS services against fraudulent DNS records
+      has become more importane.
+    - Poisoned DNS records could and have connected people to entirely
+      fraudulent DNS services.
+    - DNSSEC helps prevent these replacements, but remains awkward and
+      and combersome to enact for small environments.
+
+Not clear in RFC
+----------------
+
+* /etc/hosts predates and overrulesmost RFCs and DNS
 
 Listing the hosts, and IP addresses, in a local /etc/hosts always precedes
 DNS. (Well, OK, that can be reset in nsswitch.conf, but no one does.)
@@ -206,17 +221,7 @@ DNS. (Well, OK, that can be reset in nsswitch.conf, but no one does.)
       ::1 hostname.domainname hostname
       a.b.c.d  hostname.domainname hostname
       
-- Ring around the reverse DNS
-    - Some tools, like sshd, look up both forward and reverse DNS records
-    - PTR of IP address
-      - Hostname reported by PTR
-      - PTR of IP associated with hostname
-    - Thhis leads to single threaded musical chairs with DNS servers,
-      until and unless those records match.
-    - This can be disabled by setting the sshd to start with the '-u0'
-      - The sshd_config options do not modify this behavior
-
-- Fake DNS aliases
+* Fake DNS aliases
     - Some systems, such as modern Active Directory with its "aliases" and
       Infoblox with its "Host" records, store back end information
       linked to specific hosts with addintional IP addresses linked
@@ -228,4 +233,22 @@ DNS. (Well, OK, that can be reset in nsswitch.conf, but no one does.)
     - These fake aliases can be very awkward to track down or clean up
       as hosts expire or are migrated.
 
-  
+Emergent behavior
+-----------------
+
+* Ring around the reverse DNS
+    - Some tools, like sshd, look up both forward and reverse DNS records
+    - PTR of IP address
+      - Hostname reported by PTR
+      - PTR of IP associated with hostname
+    - Thhis leads to single threaded musical chairs with DNS servers,
+      until and unless those records match.
+    - This can be disabled by setting the sshd to start with the '-u0'
+      - The sshd_config options do not modify this behavior
+
+* Domain squatters
+    - IANA deliberately fosters domain squatting
+    - Many DNS providers log failed DNS requests and immediately
+      reserve the failed domain themselves
+    - Squatters lurk and claim expired domains withing moments
+      preying on the slow or delayed DNS admins of the world.
