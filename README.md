@@ -13,7 +13,6 @@ There are dozens. Too many for most of us to follow in every detail.
 
 * https://www.statdns.com/rfc/
 
-
 IANA relation to DNS
 --------------------
 
@@ -132,18 +131,6 @@ Vital RFCs
     - Very few systems do that multiple, unique hostname and multiple A records
       automatically.
 
-- Fake DNS aliases
-    - Some systems, such as modern Active Directory with its "aliases" and
-      Infoblox with its "Host" records, store back end information
-      linked to specific hosts with addintional IP addresses linked
-      to the same hostname and its primary IP address.
-    - These are not DNS aliases, aka CNAMEs, they are back end generated
-      multiple A records, and no RFC defines them as "aliases".
-    - This is the sort of "let's invent words" which make RFCs vital
-      for clear communication.
-    - These fake aliases can be very awkward to track down or clean up
-      as hosts expire or are migrated.
-
 - Subdomains
     - Any domain can have multiple subdomains.
       - "localdomain" can have "dev.localdomain", "prod.localdomain", or "mydepartment.localdomain"
@@ -200,3 +187,45 @@ Vital RFCs
       keys purchased from Microsoft.
 
 
+- Not documented or not clear in RFC
+------------------------------------
+
+- /etc/hosts predates and overrulesmost RFCs and DNS
+
+Listing the hosts, and IP addresses, in a local /etc/hosts always precedes
+DNS. (Well, OK, that can be reset in nsswitch.conf, but no one does.)
+
+    - Many hosts ignore DNS in favor of local tuning of /etc/hosts.
+    - These can accumulate startling errors, especially when host images
+      are duplicated carelessly or hostnames are altered carelessly.
+    - Never, never, never use both the hostname and the localhost
+      on the same line. Split them if needed.
+      127.0.0.1 localhost.localdomin localhost localhost4.localdomain localhost
+      ::1 localhost.localdomin localhost localhost64.localdomain localhost6
+      127.0.0.1 hostname.domainname hostname # pick any or all of these
+      ::1 hostname.domainname hostname
+      a.b.c.d  hostname.domainname hostname
+      
+- Ring around the reverse DNS
+    - Some tools, like sshd, look up both forward and reverse DNS records
+    - PTR of IP address
+      - Hostname reported by PTR
+      - PTR of IP associated with hostname
+    - Thhis leads to single threaded musical chairs with DNS servers,
+      until and unless those records match.
+    - This can be disabled by setting the sshd to start with the '-u0'
+      - The sshd_config options do not modify this behavior
+
+- Fake DNS aliases
+    - Some systems, such as modern Active Directory with its "aliases" and
+      Infoblox with its "Host" records, store back end information
+      linked to specific hosts with addintional IP addresses linked
+      to the same hostname and its primary IP address.
+    - These are not DNS aliases, aka CNAMEs, they are back end generated
+      multiple A records, and no RFC defines them as "aliases".
+    - This is the sort of "let's invent words" which make RFCs vital
+      for clear communication.
+    - These fake aliases can be very awkward to track down or clean up
+      as hosts expire or are migrated.
+
+  
