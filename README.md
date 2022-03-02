@@ -86,6 +86,8 @@ Vital RFCs
     - Almost everyone doing this uses 10.0.0.0/8
     - A few tools especially for home routers 192.168.0.0/16
     - Very, very few use 172.16.0.0/12
+    - Non-routable addresses are often served by private or
+      internal only DNS.
     - These leave plenty of space for local for business environments to provide local DNS records,
       and to split them up for useful departmental subdomans
 
@@ -96,6 +98,51 @@ Vital RFCs
     - A great deal of software ignores these time values and the
       associated RFCs, "optimizing performance" by caching lookups
       for hours or even permanently.
+
+- A records
+    - A records tie hostnames to IP addresses.
+    - A records are not necessarily unique. One hostname may be
+      linked to many IP addresses, and in large environments often are.
+    - Which IP address an A record leads to is often a crapshoot,
+      baswed on DNS views, local routing, application and system DNS
+      caching lookups, stashed faled lookups and the vagaries of your
+      TCP stack.
+    - Some applications cache such records at start time and require a
+      restart to change them. And yes, postfix did this.
+
+- CNAME records
+    - CNAMEs are extremely useful ways to delegate a DNS hostname to be
+      resolved with another DNS record.
+    - The chain can be very long, and very confusing, especially with DNS
+      servers that do regionalized lookups and other forms of split views.
+    - CNAMEs involve a second DNS lookup, which takes a modest amount of time
+      and resources, but is vital to web proxies around the world.
+    - Many of these web proxies serve multiple websites, and sort out the
+      traffic based on the hostname in the HTTP request.
+    - Multiple CNAME records are forbidden by various RFCs, though
+      some DNS servers do permit them.
+          - This way lies madness.
+
+- Multiple A records
+    - Multiple hostnames may link to the same target address or addresses.
+    - Multiple A records are useful for various forms of high availability, such
+      as multiple AD domain controllers.
+    - It is useful for debugging and logging if each IP also has its
+      own unique hostname, with a unique and matching PTR associated with it.
+    - Very few systems do that multiple, unique hostname and multiple A records
+      automatically.
+
+- Fake DNS aliases
+    - Some systems, such as modern Active Directory with its "aliases" and
+      Infoblox with its "Host" records, store back end information
+      linked to specific hosts with addintional IP addresses linked
+      to the same hostname and its primary IP address.
+    - These are not DNS aliases, aka CNAMEs, they are back end generated
+      multiple A records, and no RFC defines them as "aliases".
+    - This is the sort of "let's invent words" which make RFCs vital
+      for clear communication.
+    - These fake aliases can be very awkward to track down or clean up
+      as hosts expire or are migrated.
 
 - Subdomains
     - Any domain can have multiple subdomains.
@@ -120,6 +167,16 @@ Vital RFCs
         - These must be selected carefully to avoid accidental conflict or
 	  resolution as public addresses.
     - These are very broadly used for entirely internal services.
+
+- Split views
+    - Split zones make it possible tell a DNS servers that queries from one address space
+      resolve one way, and from another space resolve another way.
+    - Split views are especially common for websites that have different internal and
+      external load balancers.
+    - Split views are often very fragile, with different TTLs, poor synchronization,
+      and very confusing behavior as routing tables, VPNs, and proxies re re-arranged.
+    - Split views are the core of high-availability, and localizing
+      proxies such as Akamai and Cloudflare.
 
 - DNSSEC
     - Securing corporate DNS services against fraudulent DNS records
