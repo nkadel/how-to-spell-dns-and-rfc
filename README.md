@@ -24,8 +24,10 @@ physics for DNS
 There are confusing parts of it.
     - 127.0.0.2, for example, is part of the loopback addresses space,
       and will always hit the "localhost" as well as 127.0.0.1.
-    - 2105834626 is 127.0.0.1 written as a decimal number. 
-
+    - 0177.0000.0000.0001 is 127.0.0.1 written in octal due to leading zeros,
+      and also resolves to the loopback address.
+    - This means that http://0177.0000.0000.0001:80 points to the
+      HTTP service on localhost.
 
 Irrelevant RFCs
 ---------------
